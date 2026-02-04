@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파일 확장자 차단</title>
+    <!-- Tailwind CSS 4 CDN -->
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex items-center justify-center p-4">
+
+<div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+    <!-- Header -->
+    <div class="px-8 py-6 border-b border-gray-100 bg-white/80 backdrop-blur-md sticky top-0 z-10">
+        <h2 class="text-2xl font-semibold text-gray-900 tracking-tight">파일 확장자 차단</h2>
+        <p class="text-sm text-gray-500 mt-1">파일 확장자에 따라 특정 형식의 파일을 첨부하거나 전송하지 못하도록 제한</p>
+    </div>
+
+    <div class="p-8 space-y-8">
+        <!-- 1. 고정 확장자 영역 -->
+        <div>
+            <div class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">고정 확장자</div>
+            <div class="flex flex-wrap gap-4">
+                <div th:each="ext : ${fixedExtensions}" class="flex items-center">
+                    <label class="relative flex items-center cursor-pointer group">
+                        <input type="checkbox"
+                               class="peer sr-only fixed-ext-check"
+                               th:value="${ext}"
+                               th:id="'check-' + ${ext}"
+                               th:checked="${checkedFixedExtensions.contains(ext)}">
+                        <div class="w-5 h-5 border-2 border-gray-300 rounded-md peer-checked:bg-blue-500 peer-checked:border-blue-500 transition-all duration-200 ease-in-out flex items-center justify-center">
+                            <svg class="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <span class="ml-2 text-gray-700 group-hover:text-gray-900 transition-colors" th:text="${ext}"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 커스텀 확장자 영역 -->
+        <div>
+            <div class="flex justify-between items-end mb-3">
+                <div class="text-sm font-medium text-gray-500 uppercase tracking-wider">커스텀 확장자</div>
+                <div class="text-xs text-gray-400">
+                    <span th:text="${customCount}" class="font-semibold text-blue-600">0</span>
+                    <span class="mx-0.5">/</span>
+                    <span th:text="${maxCustomExtensionsCount}"></span>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="customExtInput"
+                       class="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder-gray-400 text-sm"
+                       placeholder="확장자 입력 (예: sh)" maxlength="20">
+                <button type="button" id="btnAddCustom"
+                        class="px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-xl transition-colors shadow-lg shadow-gray-900/10 active:scale-95 transform duration-100">
+                    + 추가
+                </button>
+            </div>
+
+            <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 min-h-[120px]">
+                <div id="customExtList" class="flex flex-wrap gap-2">
+                    <div th:each="item : ${customExtensions}"
+                         class="group flex items-center pl-3 pr-2 py-1.5 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200">
+                        <span class="text-sm text-gray-700 font-medium mr-2" th:text="${item.extension}"></span>
+                        <button type="button"
+                                class="btn-delete-custom p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                aria-label="Close"
+                                th:data-ext="${item.extension}">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- 목록이 비었을 때 안내 메시지 -->
+                    <div th:if="${#lists.isEmpty(customExtensions)}" class="w-full h-full flex items-center justify-center py-8 text-gray-400 text-sm">
+                        등록된 커스텀 확장자가 없습니다.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+        <!-- 3. 파일 검증 영역 -->
+        <div>
+            <h2 class="text-2xl font-semibold text-gray-900 tracking-tight">파일 검증</h2>
+            <p class="text-sm text-gray-500 mt-1 mb-1">차단된 확장자인지 확인할 수 있습니다.</p>
+            <div id="drop-zone" class="relative block w-full h-48 rounded-xl border-2 border-dashed border-gray-300 text-center hover:border-gray-400 transition-colors">
+                <input type="file" id="file-input" multiple
+                       class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                       th:data-max-upload-size="${maxUploadBytesSize}">
+                <div class="flex flex-col items-center justify-center h-full">
+                    <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-4-4V7a4 4 0 014-4h10a4 4 0 014 4v5a4 4 0 01-4 4H7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11v6m0 0l-3-3m3 3l3-3"></path></svg>
+                    <p class="mt-2 text-sm text-gray-500">드래그 앤 드롭 또는 <span class="font-semibold text-blue-600">파일 찾아보기</span></p>
+                    <p class="text-xs text-gray-400 mt-1">파일당 최대 사이즈 : <span th:text="${maxUploadBytesSize / 1024 / 1024}"></span>MB</p>
+                </div>
+            </div>
+
+            <div id="result-zone" class="mt-4 space-y-4 hidden">
+                <div>
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">허용된 파일</h4>
+                    <ul id="allowed-files" class="list-disc list-inside text-sm text-green-600 space-y-1"></ul>
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">차단된 파일</h4>
+                    <ul id="blocked-files" class="list-disc list-inside text-sm text-red-600 space-y-1"></ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script type="module" src="/js/index.js"></script>
+</body>
+</html>

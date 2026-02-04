@@ -1,0 +1,55 @@
+logging:
+  level:
+    root: info
+    com.heony.flowteam.enterprisedevrecruitmenttask: debug
+    org.hibernate.SQL: debug
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSSZ} %highlight([%5p]) [%thread] [%X{traceId:-}:%X{spanId:-}] %cyan(%logger{36}):%L - %msg%n"
+
+spring:
+  application:
+    name: flowteam-enterprise-dev-recruitment-task
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;CASE_INSENSITIVE_IDENTIFIERS=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+        default_batch_fetch_size: 100
+    open-in-view: false
+  servlet:
+    multipart:
+      max-request-size: 20MB
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
+    groups-order: DESC
+    operationsSorter: alpha
+    persist-authorization: true
+    disable-swagger-default-url: true
+    display-request-duration: true
+  api-docs:
+    path: /api-docs
+  show-actuator: false
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+
+extension:
+  max-custom-extensions-count: 200                  #??? ??? ?? ??
+  fixed-extensions: bat,cmd,com,cpl,exe,scr,js      #?? ??? ??
