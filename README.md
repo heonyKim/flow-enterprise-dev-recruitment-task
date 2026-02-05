@@ -6,7 +6,7 @@
 ## 1. 개발 환경 및 기술 스택
 - **Language**: Java 21
 - **Framework**: Spring Boot 3.5.10
-- **Database**: H2 Database (In-memory)
+- **Database**: H2 Database (File-based)
 - **Template Engine**: Thymeleaf
 - **Library**: Apache Tika 3.2.3 (MIME Type 검증)
 - **Build Tool**: Gradle
