@@ -24,6 +24,11 @@ repositories {
     mavenCentral()
 }
 
+bootJar {
+    archiveBaseName = 'flowteam-enterprise-dev-recruitment-task'
+    archiveFileName = 'flowteam-enterprise-dev-recruitment-task.jar'
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
